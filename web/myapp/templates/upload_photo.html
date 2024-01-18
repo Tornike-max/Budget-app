@@ -1,0 +1,31 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Photo Upload</title>
+</head>
+<body>
+    <h1>Photo Upload</h1>
+
+    <!-- Form for uploading one photo -->
+    <form action="{% url 'upload-photo' %}" method="post" enctype="multipart/form-data">
+        {% csrf_token %}
+        <!-- Use method override for PUT request -->
+        <input type="hidden" name="_method" value="put">
+
+        <label for="photo">Choose a photo:</label>
+        <input type="file" name="image" id="photo" accept="image/*">
+        <br>
+        <input type="submit" value="Upload">
+    </form>
+
+    <!-- Display the uploaded photo -->
+    <h2>Uploaded Photo</h2>
+    {% if photo %}
+        <img src="{{ photo.image.url }}" alt="Uploaded Photo">
+    {% else %}
+        <p>No photo uploaded yet.</p>
+    {% endif %}
+</body>
+</html>

@@ -1,0 +1,36 @@
+version: '3.7'
+
+services:
+  web:
+    volumes:
+      - static:/static
+    env_file:
+      - .env
+    build:
+      context: ./web
+    ports:
+      - "8000:8000"
+
+  gelguru:
+    build:
+      context: ./gelguru
+    volumes:
+      - gelguru:/app/build
+    ports:
+      - "5173:5173"
+
+  nginx:
+    build:
+      context: ./nginx
+    volumes:
+      - static:/static
+      - gelguru:/var/www/gelguru
+    ports:
+      - "80:80"
+    depends_on:
+      - web
+      - gelguru
+
+volumes:
+  static:
+  gelguru:

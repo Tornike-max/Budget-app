@@ -1,8 +1,9 @@
 from django.utils import timezone
 from django.db.models import Sum
 from rest_framework import generics, permissions
-from .models import FinancialEntry, ExpenseEntry
-from .serializers import FinancialEntrySerializer, ExpenseEntrySerializer
+from .models import FinancialEntry, ExpenseEntry,FinancialGoal
+from .serializers import FinancialEntrySerializer, ExpenseEntrySerializer,FinancialGoalSerializer
+
 
 
 # მოაქვს ინფორმაცია ცალკე ხარჯების და შემოსავლების გასული 1კვირის, 1თვის, 1წლის
@@ -16,7 +17,7 @@ class BaseEntryTotalView(generics.ListAPIView):
 
         if period == 'week':
             start_date = today - timezone.timedelta(days=today.weekday())
-            end_date = start_date + timezone.timedelta(days=6)
+            end_date = start_date + timezone.timedelta(days=7)
         elif period == 'month':
             start_date = today.replace(day=1)
             end_date = (start_date + timezone.timedelta(days=32)).replace(day=1) - timezone.timedelta(days=1)
@@ -72,7 +73,7 @@ class FinancialExpenseSummaryView(generics.ListAPIView):
         total_finances = {
             'salary': financial_entries.aggregate(total_salary=Sum('salary'))['total_salary'] or 0,
             'business_income': financial_entries.aggregate(total_business_income=Sum('business_income'))[
-                                   'total_business_income'] or 0,
+                'total_business_income'] or 0,
             'rent_income': financial_entries.aggregate(total_rent_income=Sum('rent_income'))['total_rent_income'] or 0,
             'remittances': financial_entries.aggregate(total_remittances=Sum('remittances'))['total_remittances'] or 0,
             'other': financial_entries.aggregate(total_other=Sum('other'))['total_other'] or 0,
@@ -148,3 +149,18 @@ class ExpenseEntryListCreateView(generics.ListCreateAPIView):
     queryset = ExpenseEntry.objects.all()
     serializer_class = ExpenseEntrySerializer
     permission_classes = [permissions.IsAuthenticated]
+
+class FinancialGoalListCreateView(generics.ListCreateAPIView):
+    queryset = FinancialGoal.objects.all()
+    serializer_class = FinancialGoalSerializer
+    permission_classes = [permissions.IsAuthenticated]
+
+class FinancialGoalDetailView(generics.RetrieveUpdateDestroyAPIView):
+    queryset = FinancialGoal.objects.all()
+    serializer_class = FinancialGoalSerializer
+    permission_classes = [permissions.IsAuthenticated]
+
+    def delete(self, request, *args, **kwargs):
+        instance = self.get_object()
+        self.perform_destroy(instance)
+        return Response(status=status.HTTP_204_NO_CONTENT)
